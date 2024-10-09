@@ -155,6 +155,17 @@
 #define TCR_TBI0                    (1ULL << 37)
 #define TCR_TBI1                    (1ULL << 38)
 
+/*
+ *  TCMA1 (bit [58]) controls whether memory accesses
+ *  in the address range [59:55] = 0b11111 are unchecked accesses.
+ *
+ *  TCMA0 (bit [57]) controls whether memory accesses
+ *  in the address range [59:55] = 0b00000 are unchecked accesses.
+ */
+
+#define TCR_TCMA0                   (1ULL << 57)
+#define TCR_TCMA1                   (1ULL << 58)
+
 #define TCR_PS_BITS_4GB             0x0ULL
 #define TCR_PS_BITS_64GB            0x1ULL
 #define TCR_PS_BITS_1TB             0x2ULL

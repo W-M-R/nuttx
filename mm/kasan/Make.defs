@@ -20,7 +20,8 @@
 #
 ############################################################################
 
-CSRCS += hook.c
+CSRCS += hook.c 
+CFLAGS += -Wno-error
 
 ifeq ($(CONFIG_MM_KASAN),y)
   CFLAGS += -fno-builtin

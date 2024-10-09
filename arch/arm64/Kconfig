@@ -127,6 +127,21 @@ config ARCH_ARMV8R
 	default n
 	select ARCH_SINGLE_SECURITY_STATE
 
+config ARCH_AS_HAS_ARMV8_5
+	bool "Support ARMv8.5 assembly"
+	depends on ARCH_ARMV8A
+	---help---
+		Support ARMv8.5 assembly instruction set
+
+menu "ARMv8.5 architectural features"
+	depends on ARCH_AS_HAS_ARMV8_5
+
+config ARM64_MTE
+	bool "Memory Tagging Extension support"
+	default n
+
+endmenu # "ARMv8.5 architectural features"
+
 config ARCH_SINGLE_SECURITY_STATE
 	bool "ARM Single Security State Support"
 	default n
@@ -269,6 +284,11 @@ config ARCH_CORTEX_R82
 	select ARCH_HAVE_CLUSTER_PMU
 	select ARCH_HAVE_TESTSET
 	select ARM64_HAVE_NEON
+
+config ARCH_QEMU_MAX
+	bool "QEMU virt platform with maximum features"
+	depends on ARCH_CHIP_QEMU
+	default n
 
 config ARCH_FAMILY
 	string

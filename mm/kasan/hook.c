@@ -42,6 +42,8 @@
 #  include "generic.c"
 #elif defined(CONFIG_MM_KASAN_SW_TAGS)
 #  include "sw_tags.c"
+#elif defined(CONFIG_MM_KASAN_HW_TAGS)
+#  include "hw_tags.c"
 #else
 #  define kasan_is_poisoned(addr, size) false
 #endif

@@ -348,6 +348,12 @@ config MM_KASAN_SW_TAGS
 	---help---
 		KAsan based on software tags
 
+config MM_KASAN_HW_TAGS
+	bool "KAsan HW tags"
+	depends on ARM64_MTE
+	---help---
+		KAsan based on hardware tags
+
 endchoice
 
 config MM_KASAN_ALL

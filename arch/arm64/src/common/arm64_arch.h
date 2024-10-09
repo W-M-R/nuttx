@@ -45,6 +45,40 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define Op0_shift	19
+#define Op0_mask	0x3
+#define Op1_shift	16
+#define Op1_mask	0x7
+#define CRn_shift	12
+#define CRn_mask	0xf
+#define CRm_shift	8
+#define CRm_mask	0xf
+#define Op2_shift	5
+#define Op2_mask	0x7
+#define MTE_TAG_SIZE		4
+#define MTE_TAG_SHIFT		56
+#define MTE_GRANULE_SIZE  16
+#define SYS_GMID_EL1			s3_1_c0_c0_4
+
+#define MTE_MM_SIZE       (1 << 16)
+
+/* GMID_EL1 field definitions */
+#define SYS_GMID_EL1_BS_SHIFT	0
+#define SYS_GMID_EL1_BS_SIZE	4
+
+#ifdef __ASSEMBLY__
+// The space separator is omitted so that __emit_inst(x) can be parsed as
+// either an assembler directive or an assembler macro argument.
+#define __emit_inst(x)			.inst(x)
+#else
+#define __emit_inst(x)			".inst " __stringify((x)) "\n\t"
+#endif
+
+#define sys_reg(op0, op1, crn, crm, op2) \
+	(((op0) << Op0_shift) | ((op1) << Op1_shift) | \
+	 ((crn) << CRn_shift) | ((crm) << CRm_shift) | \
+	 ((op2) << Op2_shift))
+
 #define BIT64(n)        ((1ULL) << (n))
 
 /* Bit mask with bits 0 through n-1 (inclusive) set,
@@ -78,6 +112,11 @@
  * SCTLR_EL3: System Control Register (EL3)
  *
  */
+
+#define SCTLR_EL1_ATA       (BIT(43))
+#define SCTLR_EL1_ATA0      (BIT(42))
+#define SCTLR_EL1_TCF       (BIT(41) | BIT(40))
+#define SCTLR_EL1_TCF0      (BIT(39) | BIT(38))
 
 #define SCTLR_EL3_RES1      (BIT(29) | BIT(28) | BIT(23) | \
                              BIT(22) | BIT(18) | BIT(16) | \

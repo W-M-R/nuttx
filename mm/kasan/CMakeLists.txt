@@ -20,6 +20,7 @@
 #
 # ##############################################################################
 set(SRCS hook.c)
+list(APPEND FLAGS -Wno-error)
 
 if(CONFIG_MM_KASAN)
   list(APPEND FLAGS -fno-builtin)
