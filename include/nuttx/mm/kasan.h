@@ -46,6 +46,8 @@
 #  define kasan_stop()
 #  define kasan_debugpoint(t,a,s) 0
 #  define kasan_init_early()
+#  define kasan_hw_open()
+#  define kasan_hw_close()
 #else
 
 #  define kasan_init_early() kasan_stop()
@@ -200,6 +202,23 @@ void kasan_stop(void);
  ****************************************************************************/
 
 int kasan_debugpoint(int type, FAR void *addr, size_t size);
+
+#ifndef CONFIG_MM_KASAN_MTE_TAGS
+#  define kasan_hw_open()
+#  define kasan_hw_close()
+#else
+/****************************************************************************
+ * Name: kasan_hw_open
+ ****************************************************************************/
+
+void kasan_hw_open(void);
+
+/****************************************************************************
+ * Name: kasan_hw_open
+ ****************************************************************************/
+
+void kasan_hw_close(void);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

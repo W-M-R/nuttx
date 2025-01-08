@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 #include "arm64_arch.h"
+#include "arm64_mmu.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -36,11 +37,17 @@
 
 #define GCR_EL1_VAL     0x10001
 
+/* The alignment length of the MTE must be a multiple of sixteen */
+
+#define MTE_MM_AILGN    16
+
+#define MTE_TAG_SHIFT   56
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int arm64_mte_is_support(void)
+static int mte_is_support(void)
 {
   int supported;
   __asm__ volatile (
@@ -53,15 +60,86 @@ static int arm64_mte_is_support(void)
   return supported != 0;
 }
 
+static void mte_set_tcf(bool enable)
+{
+  uint64_t val = read_sysreg(sctlr_el1);
+
+  if (enable)
+    {
+      val |= SCTLR_TCF1_BIT;
+    }
+  else
+    {
+      val &= ~SCTLR_TCF1_BIT;
+    }
+
+  write_sysreg(val, sctlr_el1);
+}
+
+static inline uint8_t mte_get_ptr_tag(const void *ptr)
+{
+  return 0xf0 | (uint8_t)(((uint64_t)(ptr)) >> MTE_TAG_SHIFT);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void arm64_enable_mte(void)
+uint8_t arm64_mte_get_random_tag(const void *addr)
+{
+  asm("irg %0, %0" : "=r" (addr));
+
+  return mte_get_ptr_tag(addr);
+}
+
+FAR void *arm64_mte_get_untagged_addr(const void *addr)
+{
+  return (FAR void *)
+         (((uint64_t)(addr)) & ~((uint64_t)0xff << MTE_TAG_SHIFT));
+}
+
+FAR void *arm64_mte_get_tagged_addr(const void *addr, uint8_t tag)
+{
+  return (FAR void *)
+         (((uint64_t)(addr)) | ((uint64_t)tag << MTE_TAG_SHIFT));
+}
+
+/* Disable MTE by clearing the TCF1 bit in SCTLR_EL1 */
+
+void arm64_mte_disable(void)
+{
+  mte_set_tcf(false);
+}
+
+/* Enable MTE by setting the TCF1 bit in SCTLR_EL1 */
+
+void arm64_mte_enable(void)
+{
+  mte_set_tcf(true);
+}
+
+/* Set memory tags for a given memory range */
+
+void arm64_mte_set_tag(const void *addr, size_t size)
+{
+  size_t i;
+
+  DEBUGASSERT((uintptr_t)addr % MTE_MM_AILGN == 0);
+  DEBUGASSERT(size % MTE_MM_AILGN == 0);
+
+  for (i = 0; i < size; i += MTE_MM_AILGN)
+    {
+      asm("stg %0, [%0]" : : "r"(addr + i));
+    }
+}
+
+/* Initialize MTE settings and enable memory tagging */
+
+void arm64_mte_init(void)
 {
   uint64_t val;
 
-  if (!arm64_mte_is_support())
+  if (!mte_is_support())
     {
       return;
     }
@@ -77,6 +155,14 @@ void arm64_enable_mte(void)
 
   assert(!(read_sysreg(ttbr0_el1) & TTBR_CNP_BIT));
   assert(!(read_sysreg(ttbr1_el1) & TTBR_CNP_BIT));
+
+  /* Controls the default value for skipping high bytes */
+
+  val = read_sysreg(tcr_el1);
+  val |= TCR_TCMA1;
+  write_sysreg(val, tcr_el1);
+
+  /* Enable the MTE function */
 
   val = read_sysreg(sctlr_el1);
   val |= SCTLR_ATA_BIT | SCTLR_TCF1_BIT;
