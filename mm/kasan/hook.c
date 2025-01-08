@@ -42,6 +42,8 @@
 #  include "generic.c"
 #elif defined(CONFIG_MM_KASAN_SW_TAGS)
 #  include "sw_tags.c"
+#elif defined(CONFIG_MM_KASAN_MTE_TAGS)
+#  include "mte_tags.c"
 #else
 #  define kasan_is_poisoned(addr, size) false
 #endif
@@ -122,6 +124,8 @@ static uint32_t g_region_init;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifndef CONFIG_MM_KASAN_MTE_TAGS
 
 static void kasan_show_memory(FAR const uint8_t *addr, size_t size,
                               size_t dumpsize)
@@ -252,6 +256,10 @@ static inline void kasan_check_report(FAR const void *addr, size_t size,
 #  endif
 #endif
 }
+#else
+#define kasan_check_report(addr, size, is_write, return_address)
+#define kasan_report(addr, size, is_write, return_address)
+#endif
 
 /****************************************************************************
  * Public Functions

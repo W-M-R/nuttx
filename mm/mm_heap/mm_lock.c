@@ -32,6 +32,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
@@ -59,6 +60,10 @@
 
 int mm_lock(FAR struct mm_heap_s *heap)
 {
+  int ret;
+
+  kasan_hw_close();
+
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Check current environment */
 
@@ -69,12 +74,19 @@ int mm_lock(FAR struct mm_heap_s *heap)
        * Or, touch the heap internal data directly.
        */
 
-      return nxmutex_is_locked(&heap->mm_lock) ? -EAGAIN : 0;
+      ret = nxmutex_is_locked(&heap->mm_lock) ? -EAGAIN : 0;
 #  else
       /* Can't take mutex in SMP interrupt handler */
 
-      return -EAGAIN;
+      ret = -EAGAIN;
 #  endif
+
+      if (ret < 0)
+        {
+          kasan_hw_open();
+        }
+
+      return ret;
     }
 #endif
 
@@ -90,6 +102,7 @@ int mm_lock(FAR struct mm_heap_s *heap)
 
   if (_SCHED_GETTID() < 0)
     {
+      kasan_hw_open();
       return -ESRCH;
     }
   else
@@ -111,9 +124,11 @@ void mm_unlock(FAR struct mm_heap_s *heap)
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   if (up_interrupt_context())
     {
+      kasan_hw_open();
       return;
     }
 #endif
 
   DEBUGVERIFY(nxmutex_unlock(&heap->mm_lock));
+  kasan_hw_open();
 }

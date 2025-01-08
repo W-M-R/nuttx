@@ -348,10 +348,22 @@ config MM_KASAN_SW_TAGS
 	---help---
 		KAsan based on software tags
 
+config MM_KASAN_MTE_TAGS
+	bool "KAsan MTE tags"
+	depends on ARM64_MTE
+	select MM_KASAN_NO_INSTRUMENT
+	---help---
+		KAsan based on hardware tags
+
 endchoice
+
+config MM_KASAN_NO_INSTRUMENT
+	bool
+	default n
 
 config MM_KASAN_ALL
 	bool "Enable KASan for the entire image"
+	depends on !MM_KASAN_NO_INSTRUMENT
 	default y
 	---help---
 		This option activates address sanitizer for the entire image.
@@ -366,6 +378,7 @@ config MM_KASAN_REGIONS
 
 config MM_KASAN_WATCHPOINT
 	int "Kasan watchpoint maximum number"
+	depends on !MM_KASAN_NO_INSTRUMENT
 	default 0
 	---help---
 		The maximum number of watchpoints that can be set by KASan.
