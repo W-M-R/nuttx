@@ -144,15 +144,17 @@
  */
 
 #ifdef CONFIG_MM_NODE_PENDING
-#  define MM_NODE_STRUCT_PENDING aligned_data(MM_ALIGN) 
+#  define MM_NODE_STRUCT_PENDING aligned_data(MM_ALIGN)
+#  define MM_SIZE_T_SIZE         MM_ALIGN
 #else
 #  define MM_NODE_STRUCT_PENDING
+#  define MM_SIZE_T_SIZE         sizeof(mmsize_t)
 #endif
 
 #ifdef CONFIG_MM_NODE_PENDING
 #  define MM_ALLOCNODE_OVERHEAD (MM_SIZEOF_ALLOCNODE - MM_ALIGN)
 #else
-#  define MM_ALLOCNODE_OVERHEAD (MM_SIZEOF_ALLOCNODE - sizeof(mmsize_t))
+#  define MM_ALLOCNODE_OVERHEAD (MM_SIZEOF_ALLOCNODE - MM_SIZE_T_SIZE)
 #endif
 
 /* Get the node size */
@@ -187,13 +189,18 @@ struct mm_allocnode_s
   union
   {
     mmsize_t preceding;                     /* Physical preceding chunk size */
-    uint8_t  align[MM_ALIGN];
+    uint8_t  preceding_align[MM_ALIGN];
+  };
+
+  union
+  {
+    mmsize_t size;                     /* Physical preceding chunk size */
+    uint8_t  size_align[MM_ALIGN];
   };
 #else
   mmsize_t preceding;                       /* Physical preceding chunk size */
-#endif
-
   mmsize_t size;                            /* Size of this chunk */
+#endif
 #if CONFIG_MM_BACKTRACE >= 0
   pid_t pid;                                /* The pid for caller */
   unsigned long seqno;                      /* The sequence of memory malloc */
@@ -211,13 +218,19 @@ struct mm_freenode_s
   union
   {
     mmsize_t preceding;                     /* Physical preceding chunk size */
-    uint8_t  align[MM_ALIGN];
+    uint8_t  preceding_align[MM_ALIGN];
+  };
+
+  union
+  {
+    mmsize_t size;                     /* Physical preceding chunk size */
+    uint8_t  size_align[MM_ALIGN];
   };
 #else
   mmsize_t preceding;                       /* Physical preceding chunk size */
+  mmsize_t size;                            /* Size of this chunk */
 #endif
 
-  mmsize_t size;                            /* Size of this chunk */
 #if CONFIG_MM_BACKTRACE >= 0
   pid_t pid;                                /* The pid for caller */
   unsigned long seqno;                      /* The sequence of memory malloc */

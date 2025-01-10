@@ -153,7 +153,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           heap->mm_curused += newsize - oldsize;
           mm_shrinkchunk(heap, oldnode, newsize);
           kasan_poison((FAR char *)oldnode + MM_SIZEOF_NODE(oldnode) +
-                       sizeof(mmsize_t), oldsize - MM_SIZEOF_NODE(oldnode));
+                       MM_SIZE_T_SIZE, oldsize - MM_SIZEOF_NODE(oldnode));
         }
 
       /* Then return the original address */
@@ -388,10 +388,12 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       sched_note_heap(NOTE_HEAP_ALLOC, heap, newmem, newsize,
                       heap->mm_curused);
       mm_unlock(heap);
+      kasan_hw_close();
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - MM_SIZEOF_ALLOCNODE);
 
       newmem = kasan_unpoison(newmem, MM_SIZEOF_NODE(oldnode) -
                               MM_ALLOCNODE_OVERHEAD);
+
       if (kasan_reset_tag(newmem) != kasan_reset_tag(oldmem))
         {
           /* Now we have to move the user contents 'down' in memory.  memcpy
@@ -401,6 +403,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           memcpy(newmem, oldmem, oldsize - MM_ALLOCNODE_OVERHEAD);
         }
 
+      kasan_hw_open();
       return newmem;
     }
 

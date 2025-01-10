@@ -31,6 +31,10 @@
 
 void arm64_mte_init(void);
 
+/* Check if MTE is enabled */
+
+bool arm64_mte_read_state(void);
+
 /* Enable MTE by setting the TCF1 bit in SCTLR_EL1 */
 
 void arm64_mte_enable(void);
