@@ -203,9 +203,12 @@ void kasan_stop(void);
 
 int kasan_debugpoint(int type, FAR void *addr, size_t size);
 
-#ifndef CONFIG_MM_KASAN_MTE_TAGS
+#ifndef CONFIG_MM_KASAN_HW_TAGS
 #  define kasan_hw_open()
 #  define kasan_hw_close()
+#  define kasan_hw_save()
+#  define kasan_hw_restore()
+#  define kasan_hw_get_safe_addr(addr) addr
 #else
 /****************************************************************************
  * Name: kasan_hw_open
@@ -218,6 +221,25 @@ void kasan_hw_open(void);
  ****************************************************************************/
 
 void kasan_hw_close(void);
+
+/****************************************************************************
+ * Name: kasan_hw_save
+ ****************************************************************************/
+
+bool kasan_hw_save(void);
+
+/****************************************************************************
+ * Name: kasan_hw_restore
+ ****************************************************************************/
+
+void kasan_hw_restore(bool state);
+
+/****************************************************************************
+ * Name: kasan_hw_restore
+ ****************************************************************************/
+
+FAR void *kasan_hw_get_safe_addr(FAR void *addr);
+
 #endif
 
 #undef EXTERN

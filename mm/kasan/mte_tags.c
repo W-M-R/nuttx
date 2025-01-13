@@ -24,7 +24,7 @@
 
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/kasan.h>
-
+#include <nuttx/sched_note.h>
 #include <arch/mte.h>
 
 #include <assert.h>
@@ -59,11 +59,29 @@ static void *kasan_set_poison(FAR const void *addr,
 void kasan_hw_open(void)
 {
   arm64_mte_enable();
+  sched_note_printf(NOTE_TAG_LOG, "HW Open: MTE enabled: %p %p\n", __builtin_return_address(0), __builtin_return_address(1));
 }
 
 void kasan_hw_close(void)
 {
   arm64_mte_disable();
+  sched_note_printf(NOTE_TAG_LOG, "HW Close: MTE disabled: %p %p\n", __builtin_return_address(0), __builtin_return_address(1));
+}
+
+bool kasan_hw_save(void)
+{
+  bool ret = arm64_mte_read_state();
+
+  kasan_hw_close();
+  return ret;
+}
+
+void kasan_hw_restore(bool state)
+{
+  if (state)
+    arm64_mte_enable();
+  else
+    arm64_mte_disable();
 }
 
 FAR void *kasan_reset_tag(FAR const void *addr)
@@ -83,6 +101,11 @@ FAR void *kasan_unpoison(FAR const void *addr, size_t size)
   uint8_t tag = arm64_mte_get_random_tag(addr);
 
   return kasan_set_poison(addr, size, tag);
+}
+
+FAR void *kasan_hw_get_safe_addr(FAR void *addr)
+{
+  return arm64_mte_get_tagged_addr(addr, arm64_mte_read_tag(addr));
 }
 
 void kasan_register(FAR void *addr, FAR size_t *size)

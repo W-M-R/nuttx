@@ -908,9 +908,11 @@ void _assert(FAR const char *filename, int linenum,
 
       reboot_notifier_call_chain(SYS_HALT, NULL);
 
+      while(1);
       reset_board(); /* Should not return. */
     }
 
+  while(1);
   if (os_ready)
     {
       spin_unlock_irqrestore(&g_assert_lock, flags);

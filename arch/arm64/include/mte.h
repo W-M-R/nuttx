@@ -31,6 +31,10 @@
 
 void arm64_mte_init(void);
 
+/* Check if MTE is enabled */
+
+bool arm64_mte_read_state(void);
+
 /* Enable MTE by setting the TCF1 bit in SCTLR_EL1 */
 
 void arm64_mte_enable(void);
@@ -54,5 +58,8 @@ FAR void *arm64_mte_get_untagged_addr(const void *addr);
 /* Get the address with label */
 
 FAR void *arm64_mte_get_tagged_addr(const void *addr, uint8_t tag);
+
+/* Get hardware tag of address */
+uint8_t arm64_mte_read_tag(void *addr);
 
 #endif /* ___ARCH_ARM64_SRC_COMMON_ARM64_MTE_H */
