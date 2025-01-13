@@ -64,11 +64,11 @@ static void mte_set_tcf(bool enable)
 {
   uint64_t val = read_sysreg(sctlr_el1);
 
-  if (enable)
+  if (enable && !(val & SCTLR_TCF1_BIT))
     {
       val |= SCTLR_TCF1_BIT;
     }
-  else
+  else if (val & SCTLR_TCF1_BIT)
     {
       val &= ~SCTLR_TCF1_BIT;
     }
@@ -102,6 +102,29 @@ FAR void *arm64_mte_get_tagged_addr(const void *addr, uint8_t tag)
 {
   return (FAR void *)
          (((uint64_t)(addr)) | ((uint64_t)tag << MTE_TAG_SHIFT));
+}
+
+uint8_t arm64_mte_read_tag(void *addr) 
+{
+    uint8_t tag;
+
+    asm volatile(
+        "ldg %0, [%1]\n"  // Load the tag from the address
+        : "=r"(tag)       // Output: tag value
+        : "r"(addr)       // Input: address to load the tag from
+        : "memory"        // Memory barrier to ensure correct ordering
+    );
+
+    return 0xf0 | tag;  // 加入 0xf0 的或操作
+}
+
+/* Read MTE TCF1 */
+
+bool arm64_mte_read_state(void)
+{
+  uint64_t val = read_sysreg(sctlr_el1);
+
+  return (val & SCTLR_TCF1_BIT);
 }
 
 /* Disable MTE by clearing the TCF1 bit in SCTLR_EL1 */
