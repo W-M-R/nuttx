@@ -132,6 +132,9 @@ void up_irqinitialize(void)
 
   up_irq_enable();
 #endif
+
+  arm_enable_dbgmonitor();
+
 }
 
 /****************************************************************************

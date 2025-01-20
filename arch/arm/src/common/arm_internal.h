@@ -540,6 +540,7 @@ void arm_stack_check_init(void) noinstrument_function;
 #endif
 
 int arm_enable_dbgmonitor(void);
+void arm_hw_breakpoint_pending(uint32_t addr, uint32_t *regs);
 
 #undef EXTERN
 #ifdef __cplusplus
