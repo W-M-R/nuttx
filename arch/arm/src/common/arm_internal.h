@@ -211,6 +211,12 @@
     __mpidr; \
   })
 
+#define FSR_FS4      (1 << 10)
+#define FSR_FS3_0    (15)
+#define FSR_FS(fsr)  ((fsr & FSR_FS3_0) | (fsr & FSR_FS4) >> 6)
+
+#define FSR_FAULT_DEBUG 2
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -371,7 +377,6 @@ EXTERN const void * const _vectors[];
 
 int  arm_svcall(int irq, void *context, void *arg);
 int  arm_hardfault(int irq, void *context, void *arg);
-int  arm_enable_dbgmonitor(void);
 int  arm_dbgmonitor(int irq, void *context, void *arg);
 
 #  if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
@@ -533,6 +538,8 @@ void arm_stack_check_init(void) noinstrument_function;
 #ifdef CONFIG_ARM_COREDUMP_REGION
   void arm_coredump_add_region(void);
 #endif
+
+int arm_enable_dbgmonitor(void);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -130,7 +130,17 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
   _alert("Prefetch abort. PC: %08" PRIx32 " IFAR: %08" PRIx32 " IFSR: %08"
          PRIx32 "\n", regs[REG_PC], ifar, ifsr);
-  PANIC_WITH_REGS("panic", regs);
+
+  if (FSR_FS(ifsr) == FSR_FAULT_DEBUG)
+    {
+      arm_hw_breakpoint_pending(ifar, regs);
+    }
+  else
+    {
+      PANIC_WITH_REGS("panic", regs);
+    }
+
+  up_set_interrupt_context(false);
   return regs; /* To keep the compiler happy */
 }
 
