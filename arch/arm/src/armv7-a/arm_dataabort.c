@@ -156,7 +156,17 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
 
   _alert("Data abort. PC: %08" PRIx32 " DFAR: %08" PRIx32 " DFSR: %08"
          PRIx32 "\n", regs[REG_PC], dfar, dfsr);
-  PANIC_WITH_REGS("panic", regs);
+
+  if (FSR_FS(dfsr) == FSR_FAULT_DEBUG)
+    {
+      arm_hw_breakpoint_pending(dfar, regs);
+    }
+  else
+    {
+      PANIC_WITH_REGS("panic", regs);
+    }
+
+  up_set_interrupt_context(false);
   return regs; /* To keep the compiler happy */
 }
 
