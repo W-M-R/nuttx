@@ -236,6 +236,16 @@ else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
+else ifeq ($(CONFIG_ARCH_TOOLCHAIN_ARMCLANG),y)
+  CC      = armclang
+  CXX     = armclang
+  CPP     = armclang -E -P -x c --target=aarch64-aarch64-none-eabi
+  LD      = armlink
+  STRIP   = llvm-strip --strip-unneeded
+  AR      = armar -rcs
+  NM      = llvm-nm
+  OBJCOPY = llvm-objcopy
+  OBJDUMP = llvm-objdump
 endif
 
 # Link Time Optimization
