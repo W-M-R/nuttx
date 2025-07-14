@@ -24,6 +24,8 @@
 
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
+set(CMAKE_C_COMPILER_FORCED TRUE)
+set(CMAKE_CXX_COMPILER_FORCED TRUE)
 
 set(ARCH_SUBDIR)
 
@@ -44,6 +46,7 @@ else() # ARM9, ARM7TDMI, etc.
 endif()
 
 include(${ARCH_SUBDIR})
+set(CMAKE_SYSTEM_ARCH ${ARCH_SUBDIR})
 
 # include the toolchain specific cmake file
 

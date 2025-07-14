@@ -32,9 +32,9 @@ set(CMAKE_PREPROCESSOR armclang -E -P -x c)
 set(CMAKE_STRIP llvm-strip --strip-unneeded)
 set(CMAKE_OBJCOPY llvm-objcopy)
 set(CMAKE_OBJDUMP llvm-objdump)
-set(CMAKE_LINKER armlink)
+set(CMAKE_LINKER armclang)
 set(CMAKE_LD armlink)
-set(CMAKE_AR armar -rcs)
+set(CMAKE_AR armar)
 set(CMAKE_NM llvm-nm)
 set(CMAKE_RANLIB llvm-ranlib)
 
@@ -42,6 +42,7 @@ set(CMAKE_RANLIB llvm-ranlib)
 # built-in functions, refer: https://github.com/apache/nuttx/pull/5971
 
 add_compile_options(-fno-builtin --target=arm-arm-none-eabi)
+add_link_options(--target=arm-arm-none-eabi)
 
 # Suppress license warning
 
@@ -64,7 +65,7 @@ add_link_options(-Wl,--diag_suppress=6329)
 
 # override the ARCHIVE command
 
-set(CMAKE_ARCHIVE_COMMAND "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_ARCHIVE_COMMAND "<CMAKE_AR> -rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_RANLIB_COMMAND "<CMAKE_RANLIB> <TARGET>")
 set(CMAKE_C_ARCHIVE_CREATE ${CMAKE_ARCHIVE_COMMAND})
 set(CMAKE_CXX_ARCHIVE_CREATE ${CMAKE_ARCHIVE_COMMAND})
@@ -239,6 +240,5 @@ if(NOT CONFIG_CXX_RTTI)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
 
-set(CMAKE_EXE_LINKER_FLAGS_INIT "--specs=nosys.specs")
-
-set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
+set(LINK_OPTION -Wl,--scatter=)
+set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c --target=arm-arm-none-eabi)

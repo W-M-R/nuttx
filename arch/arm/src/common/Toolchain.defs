@@ -253,7 +253,7 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
 
   CC      = armclang
   CXX     = armclang
-  CPP     = armclang -E -P -x c
+  CPP     = armclang -E -P -x c --target=arm-arm-none-eabi
   LD      = armlink
   STRIP   = llvm-strip --strip-unneeded
   AR      = armar -rcs
